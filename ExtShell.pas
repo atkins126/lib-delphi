@@ -3,9 +3,10 @@ unit ExtShell;
 interface
 
 uses
-  Windows, SysUtils, Registry;
+  Windows, SysUtils, Registry, ShellAPI;
 
 procedure RefreshSystemIcon;
+procedure ShellOpen(FileName: string; Directory: string = ''; hWnd: HWND = 0);
 
 implementation
 
@@ -39,6 +40,17 @@ begin
   finally
     Registry.Free;
   end;
+end;
+
+procedure ShellOpen(FileName: string; Directory: string = ''; hWnd: HWND = 0);
+var
+  DirectoryPointer: PChar;
+begin
+  if Directory <> '' then
+    DirectoryPointer := PChar(Directory)
+  else
+    DirectoryPointer := nil;
+  ShellExecute(hWnd, 'open', PChar(FileName), nil, DirectoryPointer, SW_NORMAL);
 end;
 
 end.

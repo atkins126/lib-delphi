@@ -24,6 +24,9 @@ function GetUsedDiskSpace(Directory: string): UInt64;
 function GetSystemInformation: TSystemInfo;
 function GetProcessorCount: Cardinal;
 function GetProcessorType: Cardinal;
+function GetVolumeName(DriveLetter: Char): string;
+function GetRemoteVolumeName(DriveLetter: Char): string;
+function GetVersionInformation: TOSVersionInfo;
 
 implementation
 
@@ -94,6 +97,37 @@ end;
 function GetProcessorType: Cardinal;
 begin
   Result := GetSystemInformation.dwProcessorType;
+end;
+
+function GetVolumeName(DriveLetter: Char): string;
+var
+  MaxComponentLength, VolumeFlags: Cardinal;
+  VolumeNameBuffer: array [0..255] of Char;
+begin
+  if GetVolumeInformation(PChar(DriveLetter + ':\'), VolumeNameBuffer,
+      SizeOf(VolumeNameBuffer), nil, MaxComponentLength, VolumeFlags, nil, 0) then
+    Result := VolumeNameBuffer
+  else
+    Result := '';
+end;
+
+function GetRemoteVolumeName(DriveLetter: Char): string;
+var
+  VolumeNameBuffer: array [0..255] of Char;
+  BufferSize: Cardinal;
+begin
+  BufferSize := SizeOf(VolumeNameBuffer);
+  if WNetGetConnection(PChar(DriveLetter + ':'), VolumeNameBuffer,
+      BufferSize) = NO_ERROR then
+    Result := VolumeNameBuffer
+  else
+    Result := '';
+end;
+
+function GetVersionInformation: TOSVersionInfo;
+begin
+  Result.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
+  GetVersionEx(Result);
 end;
 
 end.
